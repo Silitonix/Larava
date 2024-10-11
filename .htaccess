@@ -1,0 +1,19 @@
+# Enable mod_rewrite for clean URLs and other rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the requested file or directory does not exist, pass the request to index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ /index.php [L,QSA]
+</IfModule>
+
+# Enable X-Sendfile to offload file serving to Apache
+<IfModule mod_xsendfile.c>
+    XSendFile On
+    # Define the directory from where files will be served via X-Sendfile
+    XSendFilePath ./
+</IfModule>
+
+# Optionally, disable directory listings
+Options -Indexes

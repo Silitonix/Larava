@@ -1,0 +1,19 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    root /www;
+    server_name example.com;
+
+    location /x-accel-redirect {
+        internal;
+        alias $document_root/;
+    }
+
+    location / {
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param PATH_INFO $uri;
+    }
+}
