@@ -2,6 +2,8 @@
 
 namespace Module;
 
+use Module\Route\Info;
+
 class Cache
 {
     private static string $directory = 'Cache';
@@ -23,7 +25,7 @@ class Cache
 
     static function filename()
     {
-        $filename = Route::hash();
+        $filename = hash('sha256', Info::$uri);
         $dir = self::$directory;
         return "$dir/$filename.html";
     }
@@ -33,6 +35,7 @@ class Cache
         $filename = self::filename();
         File::delete($filename);
     }
+
     static function fetch()
     {
         $filename = self::filename();

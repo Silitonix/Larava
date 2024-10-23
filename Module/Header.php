@@ -4,6 +4,11 @@ namespace Module;
 
 class Header
 {
+    static function redirect(string $new)
+    {
+        self::code(303);
+        header("Location: $new");
+    }
     static function mime(string $name)
     {
         $mime = Mime::get_mime($name);

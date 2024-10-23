@@ -1,14 +1,19 @@
 <?php
 
+use Module\Error;
 use Module\Header;
+use Module\Route\Info;
 use Module\System;
 
 define('ROOT', __DIR__);
 
-function err(string $title, string $msg): never
+function err(string $title, string $msg, int $code = 500): never
 {
-    Header::code(500);
-    echo "<h1>$title 500 Error</h1> <p>$msg<p>" . '<br>';
+    Header::code($code);
+    echo "<h1>$title 500 Error</h1> <p>$msg<p>";
+    ob_start();
+    debug_print_backtrace();
+    echo str_replace('#', '<br>#', ob_get_clean());
     die();
 }
 
@@ -34,7 +39,7 @@ function path(string $path): string
     $exist = file_exists($path);
 
     if ($exist === false) {
-        err('Path', 'Path does not exist');
+        err(title: 'Path', msg: 'Path does not exist');
     }
 
     return $path;

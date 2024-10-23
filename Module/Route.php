@@ -2,22 +2,33 @@
 
 namespace Module;
 
+use Module\Route\Info;
+
 class Route
 {
+
+    const default_namespace = 'Controller';
     private static Route $instance;
     private static string $prefix = '';
     private static string $method;
     private static string $uri;
-    private static array $args;
     private static string $class;
-    private static string $namespace = 'Controller';
+    private static string $namespace = Route::default_namespace;
 
     private static $patterns = [
-        '/' => '\\/',
-        '{number}' => '(\d+)',
-        '{string}' => '(\pL+)',
-        '{any}' => '(.+)',
-        '{skip}' => '.+'
+        '/\//' => '\\/',
+        '/{skip}/' => '.*',
+        '/{(.+)}/' => '(?<$1>.+)',
+        '/:any}/' => ':.+}',
+        '/:int}/' => ':[-+]?\d+}',
+        '/:float}/' => ':[-+]?[0-9]*\.[0-9]+}',
+        '/:hex}/' => ':[0-9a-fA-F]+}',
+        '/:octal}/' => ':[0-7]+}',
+        '/:decimal}/' => ':\d+}',
+        '/:string}/' => ':\pL+}',
+        '/:kabab}/' => ':[a-zA-Z0-9\-]+}',
+        '/:snake}/' => ':[a-zA-Z0-9_]+}',
+        '/\{([\pL_]+)(?:\:((?:[^{}]|{[^{}]*})+))?\}/' => '(?<$1>$2)',
     ];
 
     public static function __init()
@@ -30,14 +41,25 @@ class Route
         $pass = self::match_route();
         if (!$pass) return false;
 
-        $slice = array_slice($pass, 1);
-        $callback(...$slice);
+        $params = array_filter($pass, 'is_string', ARRAY_FILTER_USE_KEY);
+
+        $callback(...$params);
         die();
     }
 
-    public static function set_namespace(string $namespace)
+    public function redirect(string $route)
     {
+        if (!self::match_route()) return false;
+        Header::redirect($route);
+        die();
+    }
+
+    public static function use(string $namespace): callable
+    {
+        $old = self::$namespace;
         self::$namespace = $namespace;
+        return function (...$ignores) {};
+        self::$namespace = Route::default_namespace;
     }
 
     public static function group(string $prefix): callable
@@ -53,29 +75,18 @@ class Route
     {
         $keys = array_keys(self::$patterns);
         $values = array_values(self::$patterns);
-        $pattern = str_replace($keys, $values, $uri);
+        $pattern = preg_replace($keys, $values, $uri);
         return "/^$pattern$/";
-    }
-
-    public static function hash()
-    {
-        $hash =
-            self::$class .
-            self::$method .
-            self::$uri .
-            serialize(self::$args);
-
-        return hash('xxh128', $hash);
     }
 
     private static function compare($method, $uri)
     {
         $method = strtoupper($method);
-        if (Route\Info::$method !== $method) return false;
-        if (strcmp(Route\Info::$uri, $uri) === 0) return [$uri];
+        if (Info::$method !== $method) return false;
+        if (strcmp(Info::$uri, $uri) === 0) return [$uri];
 
         $pattern = self::format($uri);
-        if (!preg_match($pattern, Route\Info::$uri, $matches)) return false;
+        if (!preg_match($pattern, Info::$uri, $matches)) return false;
 
         return $matches;
     }
@@ -109,15 +120,21 @@ class Route
             if ($pass === false) return self::clear();
 
             $class = self::$namespace . '\\' . self::$class;
-
             $instance = new $class();
-            $slice = array_slice($pass, 1);
-
-            self::$args = [...$slice, ...$args];
 
             Cache::fetch();
 
-            $instance->$method(...self::$args);
+            $params = array_filter([...$pass, ...$args], 'is_string', ARRAY_FILTER_USE_KEY);
+
+            try {
+
+                $instance->$method(...$params);
+            } catch (\Throwable $th) {
+
+                err(title: 'Router', msg: 'there is a problem for calling connected class to route');
+            }
+
+
             die();
         }
 
@@ -125,7 +142,7 @@ class Route
             err('Router', 'Invalid HTTP Method called');
         }
         self::$method = $method;
-        self::$uri = $args[0];
+        self::$uri = $args[0] ?? '';
 
         return self::$instance;
     }
