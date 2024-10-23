@@ -63,7 +63,7 @@ class File
         return file_exists($path);
     }
 
-    
+
     static function serve($filename)
     {
         $path = path($filename);
@@ -78,7 +78,7 @@ class File
             header("Content-Disposition: attachment; filename=" . basename($filename));
         } else {
             readfile($path);
-            exit;
         }
+        exit;
     }
 }
