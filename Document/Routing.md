@@ -7,6 +7,7 @@ The new syntax provides a more concise and expressive way to define routes, maki
 ## Classname and Namespaces
 
 the **`Route`** classname is for define new routes and related jobs to routing. router use namespace as directory name and classname as file name for your class.
+route are stored in Route folder wich is each one separate by namespace file like for controllers you have **"Route/Controller.php"**
 
 **Class example**:
 

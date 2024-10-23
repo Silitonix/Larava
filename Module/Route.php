@@ -7,13 +7,13 @@ use Module\Route\Info;
 class Route
 {
 
-    const default_namespace = 'Controller';
+    const directory = 'Route';
     private static Route $instance;
     private static string $prefix = '';
     private static string $method;
     private static string $uri;
     private static string $class;
-    private static string $namespace = Route::default_namespace;
+    private static string $namespace;
 
     private static $patterns = [
         '/\//' => '\\/',
@@ -54,12 +54,10 @@ class Route
         die();
     }
 
-    public static function use(string $namespace): callable
+    public static function load(string $namespace)
     {
-        $old = self::$namespace;
         self::$namespace = $namespace;
-        return function (...$ignores) {};
-        self::$namespace = Route::default_namespace;
+        import(self::directory . '/' . $namespace);
     }
 
     public static function group(string $prefix): callable
