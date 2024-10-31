@@ -1,6 +1,8 @@
 <?php
 
-namespace Module;
+namespace System;
+
+use System\View\Header;
 
 class File
 {
@@ -36,6 +38,15 @@ class File
         return self::write($filename, $data, 'a');
     }
 
+    static function rename($oldName, $newName): bool
+    {
+        if (!self::exist($oldName)) return false;
+        $oldPath = path($oldName);
+        $newPath = dirname($oldPath) . '/' . $newName;
+
+        return rename($oldPath, $newPath);
+    }
+
     static function mkdir($filename)
     {
         $filename = path_real($filename);
@@ -46,15 +57,28 @@ class File
 
     static function delete($filename)
     {
-        $path = path($filename);
+        $path = path_real($filename);
 
-        if ($path === false) return true;
+        if (!file_exists($path)) return true;
         if (!is_dir($path)) return unlink($path);
 
         foreach (scandir($path) as $file) {
             if ($file == '..' || $file == '.') continue;
             if (!self::delete($filename . '/' . $file)) return false;
         }
+
+        rmdir($path);
+    }
+
+    static function glob(string $path)
+    {
+        $path = path_real($path);
+        return glob($path);
+    }
+
+    static function mglob(string ...$paths)
+    {
+        return array_map(fn($p) => self::glob($p), $paths);
     }
 
     static function exist($filename)

@@ -1,27 +1,25 @@
 <?php
 
-namespace Module;
+namespace System;
+
+use System\View\Header;
 
 class Json
 {
-    static function from(string $string)
+    static function read(string $string)
     {
         json_decode($string, true);
     }
 
-    static function create(mixed $mix): string|false
+    static function from(mixed $mix): string|false
     {
         return json_encode($mix);
     }
-
-    static function error(string $msg) {
-        
-    }
-
+    
     static function serve(mixed $mix): never
     {
         Header::mime('.json');
-        echo self::create($mix);
+        echo self::from($mix);
         die;
     }
 }

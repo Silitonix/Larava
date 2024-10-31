@@ -1,12 +1,14 @@
 <?php
 
-namespace Module;
+namespace System\View;
 
-use Module\Route\Info;
+use System\File;
+use System\Route\Info;
 
 class Cache
 {
-    private static string $directory = 'Cache';
+    private const DIRECTORY = 'Cache';
+    private const ALGORITHM = 'sha256';
 
     static function start()
     {
@@ -25,8 +27,8 @@ class Cache
 
     static function filename()
     {
-        $filename = hash('sha256', Info::$uri);
-        $dir = self::$directory;
+        $filename = hash(self::ALGORITHM, Info::$uri);
+        $dir = self::DIRECTORY;
         return "$dir/$filename.html";
     }
 

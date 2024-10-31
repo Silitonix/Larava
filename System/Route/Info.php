@@ -1,6 +1,6 @@
 <?php
 
-namespace Module\Route;
+namespace System\Route;
 
 class Info
 {

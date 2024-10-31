@@ -1,0 +1,13 @@
+#!/bin/php
+<?php
+
+use System\Command\Console;
+use System\Command\Flag;
+
+require_once 'runtime.php';
+
+$plugin = Console::add('🔌', 'plugin', 'Manage you plugins', function () {});
+$plugin->flag_add(new Flag('i', 'install', 'install new plugin from github', 0, function () {}));
+$plugin->flag_add(new Flag('d', 'delete', 'delete a plugin', 0, function () {}));
+
+Console::init($argv);

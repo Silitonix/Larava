@@ -1,19 +1,33 @@
 <?php
 
-namespace Module;
+namespace System\Route;
 
-use Module\Route\Info;
+use System\View\Cache;
+use System\View\Header;
 
-class Route
+/**
+ * Router
+ *
+ * @method static \System\Route get(?string $url)
+ * @method static \System\Route post(?string $url)
+ * @method static \System\Route put(?string $url)
+ * @method static \System\Route delete(?string $url)
+ * @method static \System\Route patch(?string $url)
+ * @method static \System\Route options(?string $url)
+ * @method static \System\Route head(?string $url)
+ * @method static \System\Route connect(?string $url)
+ * @method static \System\Route trace(?string $url)
+ */
+class Router
 {
 
-    const directory = 'Route';
-    private static Route $instance;
+    public const DIRECTORY = 'Route';
+    private static Router $instance;
     private static string $prefix = '';
+    private static string $namespace;
+    private static string $class;
     private static string $method;
     private static string $uri;
-    private static string $class;
-    private static string $namespace;
 
     private static $patterns = [
         '/\//' => '\\/',
@@ -33,7 +47,7 @@ class Route
 
     public static function __init()
     {
-        self::$instance = new Route();
+        self::$instance = new Router();
     }
 
     public function handle($callback)
@@ -47,17 +61,18 @@ class Route
         die();
     }
 
-    public function redirect(string $route)
+    public function redirect(string $route): void
     {
-        if (!self::match_route()) return false;
+        if (!self::matchRoute()) return;
+
         Header::redirect($route);
-        die();
+        exit();
     }
 
     public static function load(string $namespace)
     {
         self::$namespace = $namespace;
-        import(self::directory . '/' . $namespace);
+        import(self::DIRECTORY . '/' . $namespace);
     }
 
     public static function group(string $prefix): callable
@@ -69,7 +84,7 @@ class Route
         };
     }
 
-    public static function format($uri)
+    private static function format($uri)
     {
         $keys = array_keys(self::$patterns);
         $values = array_values(self::$patterns);
@@ -105,15 +120,9 @@ class Route
         return false;
     }
 
-    public function __get($class)
+    public function __call($method, $args)
     {
-        self::$class = $class;
-        return self::class;
-    }
-
-    public static function __callStatic($method, $args)
-    {
-        if (!empty(self::$method)) {
+        if (!empty(self::$class)) {
             $pass = self::match_route();
             if ($pass === false) return self::clear();
 
@@ -125,18 +134,54 @@ class Route
             $params = array_filter([...$pass, ...$args], 'is_string', ARRAY_FILTER_USE_KEY);
 
             try {
-
                 $instance->$method(...$params);
             } catch (\Throwable $th) {
 
-                err(title: 'Router', msg: 'there is a problem for calling connected class to route');
+                err(
+                    title: 'Router',
+                    msg: "there is a problem for calling connected class to route<br>{$th->getMessage()}"
+                );
+            }
+
+
+            die();
+        }
+    }
+
+    public function __get($class)
+    {
+        self::$class = $class;
+        return self::class;
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        if (!empty(self::$class)) {
+            $pass = self::match_route();
+            if ($pass === false) return self::clear();
+
+            $class = self::$namespace . '\\' . self::$class;
+            $instance = new $class();
+
+            Cache::fetch();
+
+            $params = array_filter([...$pass, ...$args], 'is_string', ARRAY_FILTER_USE_KEY);
+
+            try {
+                $instance->$method(...$params);
+            } catch (\Throwable $th) {
+
+                err(
+                    title: 'Router',
+                    msg: "there is a problem for calling connected class to route<br>{$th->getMessage()}"
+                );
             }
 
 
             die();
         }
 
-        if (!Route\Method::have($method)) {
+        if (!Method::is_valid($method)) {
             err('Router', 'Invalid HTTP Method called');
         }
         self::$method = $method;

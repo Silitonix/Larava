@@ -1,6 +1,6 @@
 <?php
 
-namespace Module\Route;
+namespace System\Route;
 
 class Method
 {
@@ -14,7 +14,7 @@ class Method
     const CONNECT = 'CONNECT';
     const TRACE = 'TRACE';
 
-    static function have($method)
+    static function is_valid($method)
     {
         $method = strtoupper($method);
         return defined(self::class . '::' . $method);

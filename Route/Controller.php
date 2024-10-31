@@ -1,5 +1,6 @@
 <?php
 
-use Module\Route;
 
-Route::get('/')->Page::index();
+use System\Route\Router;
+
+Router::get('{skip}')->Page::index();

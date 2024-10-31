@@ -1,10 +1,10 @@
 <?php
 
-namespace Module;
+namespace System\View;
 
 class Mime
 {
-    public static array $mime_map = [
+    private const MAP = [
         "wof" => "application/font-woff",
         "php" => "application/php",
         "otf" => "application/x-font-otf",
@@ -995,6 +995,6 @@ class Mime
     public static function get_mime(string $filename)
     {
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        return self::$mime_map[strtolower($ext)] ?? 'application/octet-stream';
+        return self::MAP[strtolower($ext)] ?? 'application/octet-stream';
     }
 }
