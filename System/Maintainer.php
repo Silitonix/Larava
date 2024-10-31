@@ -8,7 +8,7 @@ class Maintainer
 {
     static function init(): void
     {
-        Router::load('Controller');
         Plugin::load();
+        Router::load('Controller');
     }
 }

@@ -4,6 +4,7 @@ namespace System\Route;
 
 use System\View\Cache;
 use System\View\Header;
+use Throwable;
 
 /**
  * Router
@@ -24,10 +25,10 @@ class Router
     public const DIRECTORY = 'Route';
     private static Router $instance;
     private static string $prefix = '';
-    private static string $namespace;
-    private static string $class;
-    private static string $method;
-    private static string $uri;
+    private static string $namespace = '';
+    private static string $class = '';
+    private static string $method = '';
+    private static string $uri = '';
 
     private static $patterns = [
         '/\//' => '\\/',
@@ -52,25 +53,24 @@ class Router
 
     public function handle($callback)
     {
-        $pass = self::match_route();
-        if (!$pass) return false;
+        $params = self::match_route();
+        if (!$params) return false;
 
-        $params = array_filter($pass, 'is_string', ARRAY_FILTER_USE_KEY);
-
+        $params = array_filter($params, 'is_string', ARRAY_FILTER_USE_KEY);
         $callback(...$params);
-        die();
+        exit();
     }
 
     public function redirect(string $route): void
     {
-        if (!self::matchRoute()) return;
-
+        if (!self::match_route()) return;
         Header::redirect($route);
         exit();
     }
 
-    public static function load(string $namespace)
+    public static function load(string $namespace, string $class = '')
     {
+        self::$class = $class;
         self::$namespace = $namespace;
         import(self::DIRECTORY . '/' . $namespace);
     }
@@ -114,7 +114,6 @@ class Router
 
     private static function clear()
     {
-        self::$class = '';
         self::$method = '';
         self::$uri = '';
         return false;
@@ -122,30 +121,7 @@ class Router
 
     public function __call($method, $args)
     {
-        if (!empty(self::$class)) {
-            $pass = self::match_route();
-            if ($pass === false) return self::clear();
-
-            $class = self::$namespace . '\\' . self::$class;
-            $instance = new $class();
-
-            Cache::fetch();
-
-            $params = array_filter([...$pass, ...$args], 'is_string', ARRAY_FILTER_USE_KEY);
-
-            try {
-                $instance->$method(...$params);
-            } catch (\Throwable $th) {
-
-                err(
-                    title: 'Router',
-                    msg: "there is a problem for calling connected class to route<br>{$th->getMessage()}"
-                );
-            }
-
-
-            die();
-        }
+        self::invoke_class_method($method, $args);
     }
 
     public function __get($class)
@@ -156,37 +132,51 @@ class Router
 
     public static function __callStatic($method, $args)
     {
-        if (!empty(self::$class)) {
-            $pass = self::match_route();
-            if ($pass === false) return self::clear();
+        self::invoke_class_method($method, $args);
+        return self::prepare_request_method($method, $args[0] ?? '');
+    }
 
-            $class = self::$namespace . '\\' . self::$class;
-            $instance = new $class();
-
-            Cache::fetch();
-
-            $params = array_filter([...$pass, ...$args], 'is_string', ARRAY_FILTER_USE_KEY);
-
-            try {
-                $instance->$method(...$params);
-            } catch (\Throwable $th) {
-
-                err(
-                    title: 'Router',
-                    msg: "there is a problem for calling connected class to route<br>{$th->getMessage()}"
-                );
-            }
-
-
-            die();
+    private static function invoke_class_method($method, $args)
+    {
+        if (empty(self::$class) || empty(self::$method)) {
+            return;
         }
 
+        $url_params = self::match_route();
+        if ($url_params === false) return self::clear();
+
+        $class = self::$namespace . '\\' . self::$class;
+        $instance = new $class();
+
+        Cache::fetch();
+        $merged = array_merge($url_params, $args);
+        $params = array_filter($merged, 'is_string', ARRAY_FILTER_USE_KEY);
+
+        try {
+            $instance->$method(...$params);
+        } catch (Throwable $th) {
+            self::error("there is a problem for calling connected class to route", $th);
+        }
+
+        exit();
+    }
+
+    private static function prepare_request_method($method, $uri)
+    {
         if (!Method::is_valid($method)) {
             err('Router', 'Invalid HTTP Method called');
         }
         self::$method = $method;
-        self::$uri = $args[0] ?? '';
+        self::$uri = $uri;
 
         return self::$instance;
+    }
+
+    private static function error(string $message, Throwable $th)
+    {
+        err(
+            title: 'Router',
+            msg: "$message<br>{$th->getMessage()}"
+        );
     }
 }
