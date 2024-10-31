@@ -1,9 +1,9 @@
 <?php
 
-namespace System\View;
+namespace Library\View;
 
-use System\File;
-use System\Route\Info;
+use Library\File;
+use Library\Route\Info;
 
 class Cache
 {

@@ -1,5 +1,5 @@
 <?php require_once 'runtime.php';
 
-use System\Maintainer;
+use Library\Maintainer;
 
 Maintainer::init();

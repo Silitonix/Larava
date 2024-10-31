@@ -1,5 +1,5 @@
 <?php
 
-use System\Route\Router;
+use Library\Route\Router;
 
 Router::get()->index();

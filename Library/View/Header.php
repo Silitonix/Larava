@@ -1,8 +1,8 @@
 <?php
 
-namespace System\View;
+namespace Library\View;
 
-use System\Mime;
+use Library\Mime;
 
 class Header
 {

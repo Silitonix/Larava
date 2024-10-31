@@ -1,6 +1,6 @@
 <?php
 
-namespace System\View;
+namespace Library\View;
 
 class Mime
 {

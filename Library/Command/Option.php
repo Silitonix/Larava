@@ -1,9 +1,9 @@
 <?php
 
-namespace System\Command;
+namespace Library\Command;
 
 use Closure;
-use System\Command\Flag;
+use Library\Command\Flag;
 
 class Option
 {

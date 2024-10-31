@@ -1,8 +1,8 @@
 #!/bin/php
 <?php
 
-use System\Command\Console;
-use System\Command\Flag;
+use Library\Command\Console;
+use Library\Command\Flag;
 
 require_once 'runtime.php';
 

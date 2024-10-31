@@ -1,6 +1,6 @@
 <?php
 
-use System\View\Header;
+use Library\View\Header;
 
 define('ROOT', __DIR__);
 define('STATE', 'ALPHA');

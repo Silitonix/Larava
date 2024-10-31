@@ -1,6 +1,6 @@
 <?php
 
-namespace System\Command;
+namespace Library\Command;
 
 use Closure;
 

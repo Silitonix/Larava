@@ -1,6 +1,6 @@
 <?php
 
 
-use System\Route\Router;
+use Library\Route\Router;
 
 Router::get('{skip}')->Page::index();

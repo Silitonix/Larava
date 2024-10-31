@@ -1,8 +1,8 @@
 <?php
 
-namespace System;
+namespace Library;
 
-use System\Route\Router;
+use Library\Route\Router;
 
 class Maintainer
 {

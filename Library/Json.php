@@ -1,8 +1,8 @@
 <?php
 
-namespace System;
+namespace Library;
 
-use System\View\Header;
+use Library\View\Header;
 
 class Json
 {
