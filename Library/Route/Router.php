@@ -2,6 +2,7 @@
 
 namespace Library\Route;
 
+use Closure;
 use Library\View\Cache;
 use Library\View\Header;
 use Throwable;
@@ -75,13 +76,13 @@ class Router
         import(self::DIRECTORY . '/' . $namespace);
     }
 
-    public static function group(string $prefix): callable
+    public static function group(string $prefix, Closure $closure): void
     {
+        $prefix_original = self::$prefix;
         self::$prefix .= $prefix;
-        return function (...$ignores) use ($prefix) {
-            $len = strlen($prefix);
-            self::$prefix = substr(self::$prefix, 0, -$len);
-        };
+        if (!str_starts_with(Info::$uri, self::$prefix)) return;
+        $closure();
+        self::$prefix = $prefix_original;
     }
 
     private static function format($uri)
@@ -132,16 +133,14 @@ class Router
 
     public static function __callStatic($method, $args)
     {
+        if (empty(self::$class) || empty(self::$method)) {
+            return self::prepare_request_method($method, $args[0] ?? '');
+        }
         self::invoke_class_method($method, $args);
-        return self::prepare_request_method($method, $args[0] ?? '');
     }
 
     private static function invoke_class_method($method, $args)
     {
-        if (empty(self::$class) || empty(self::$method)) {
-            return;
-        }
-
         $url_params = self::match_route();
         if ($url_params === false) return self::clear();
 
