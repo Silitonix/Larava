@@ -85,6 +85,14 @@ class Router
         self::$prefix = $prefix_original;
     }
 
+    public static function global(Closure $closure): void
+    {
+        $prefix_original = self::$prefix;
+        self::$prefix = '';
+        $closure();
+        self::$prefix = $prefix_original;
+    }
+
     private static function format($uri)
     {
         $keys = array_keys(self::$patterns);
