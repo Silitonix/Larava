@@ -93,11 +93,10 @@ class Plugin
 
         foreach ($routes as $route) {
             $prefix = strtolower($route);
-            Router::group("/$prefix")(
-                Router::load(self::DIRECTORY . '\\' . $route, 'Plugin')
-            );
+            Router::group("/$prefix", fn() => Router::load(self::DIRECTORY . '\\' . $route, 'Plugin'));
         }
     }
+
     private static function error(string $message): void
     {
         err('Plugin', $message);
