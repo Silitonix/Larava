@@ -3,6 +3,7 @@
 use Library\View\Header;
 
 define('ROOT', __DIR__);
+define('NL', '\n');
 define('STATE', 'ALPHA');
 define('VERSION', '0.0.0');
 

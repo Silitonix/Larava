@@ -4,7 +4,7 @@
 use Library\Command\Console;
 use Library\Command\Flag;
 
-require_once 'runtime.php';
+require_once 'utils.php';
 
 $plugin = Console::add('🔌', 'plugin', 'Manage you plugins', function () {});
 $plugin->flag_add(new Flag('i', 'install', 'install new plugin from github', 0, function () {}));

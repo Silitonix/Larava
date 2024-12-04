@@ -2,7 +2,7 @@
 
 namespace Library\View;
 
-use Library\Mime;
+use Library\View\Mime;
 
 class Header
 {
